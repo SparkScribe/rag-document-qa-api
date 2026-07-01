@@ -1,10 +1,12 @@
 """Shared pytest fixtures."""
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
+from contextlib import asynccontextmanager
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
@@ -40,11 +42,14 @@ def mock_vector_store(settings: Settings) -> MagicMock:
 
 @pytest.fixture
 def client(mock_vector_store: MagicMock, settings: Settings) -> Generator[TestClient, None, None]:
-    app = create_app()
+    @asynccontextmanager
+    async def test_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+        app.state.settings = settings
+        app.state.vector_store = mock_vector_store
+        yield
 
-    with (
-        patch("app.core.lifespan.get_settings", return_value=settings),
-        patch("app.core.lifespan.VectorStore", return_value=mock_vector_store),
-    ):
-        with TestClient(app) as test_client:
-            yield test_client
+    app = create_app()
+    app.router.lifespan_context = test_lifespan
+
+    with TestClient(app) as test_client:
+        yield test_client
