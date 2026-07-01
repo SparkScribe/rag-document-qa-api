@@ -4,13 +4,18 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.core.auth import require_api_key
 from app.core.lifespan import get_rag_service
 from app.schemas.query import QueryRequest, QueryResponse
 from app.services.rag import RAGError, RAGService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/query", tags=["query"])
+router = APIRouter(
+    prefix="/query",
+    tags=["query"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 @router.post("", response_model=QueryResponse)

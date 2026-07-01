@@ -4,6 +4,7 @@ import logging
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
+from app.core.auth import require_api_key
 from app.core.lifespan import get_document_store, get_ingestion_service
 from app.schemas.documents import (
     DocumentCreateResponse,
@@ -17,7 +18,11 @@ from app.services.parsing import EmptyDocumentError, UnsupportedFileTypeError
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/documents", tags=["documents"])
+router = APIRouter(
+    prefix="/documents",
+    tags=["documents"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 @router.post("", response_model=DocumentCreateResponse, status_code=status.HTTP_201_CREATED)

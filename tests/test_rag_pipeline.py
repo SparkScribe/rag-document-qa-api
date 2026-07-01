@@ -228,6 +228,11 @@ def test_sanitize_excerpt_truncates_long_text() -> None:
 
 
 @pytest.fixture
+def api_key_headers(rag_settings: Settings) -> dict[str, str]:
+    return {"X-API-Key": rag_settings.api_key}
+
+
+@pytest.fixture
 def query_client(
     rag_settings: Settings,
     sample_chunks: list[ScoredChunk],
@@ -270,10 +275,14 @@ def query_client(
         yield client
 
 
-def test_query_endpoint_returns_sources(query_client: TestClient) -> None:
+def test_query_endpoint_returns_sources(
+    query_client: TestClient,
+    api_key_headers: dict[str, str],
+) -> None:
     response = query_client.post(
         "/api/v1/query",
         json={"question": "What is RAG?", "top_k": 2},
+        headers=api_key_headers,
     )
 
     assert response.status_code == 200
@@ -285,13 +294,17 @@ def test_query_endpoint_returns_sources(query_client: TestClient) -> None:
     assert "excerpt" in body["sources"][0]
 
 
-def test_query_endpoint_no_results(query_client: TestClient) -> None:
+def test_query_endpoint_no_results(
+    query_client: TestClient,
+    api_key_headers: dict[str, str],
+) -> None:
     # Replace search results via the app's rag_service vector store.
     query_client.app.state.rag_service._vector_store.search_results = []  # type: ignore[attr-defined]
 
     response = query_client.post(
         "/api/v1/query",
         json={"question": "Anything"},
+        headers=api_key_headers,
     )
 
     assert response.status_code == 200

@@ -97,6 +97,11 @@ def mock_embedding_service(embedding_dimensions: int) -> MagicMock:
 
 
 @pytest.fixture
+def api_key_headers(ingestion_settings: Settings) -> dict[str, str]:
+    return {"X-API-Key": ingestion_settings.api_key}
+
+
+@pytest.fixture
 def documents_client(
     ingestion_settings: Settings,
     in_memory_vector_store: InMemoryVectorStore,
@@ -145,10 +150,12 @@ def test_upload_txt_stores_chunks(
     in_memory_vector_store: InMemoryVectorStore,
     sample_text: str,
     mock_embedding_service: MagicMock,
+    api_key_headers: dict[str, str],
 ) -> None:
     response = documents_client.post(
         "/api/v1/documents",
         files={"file": ("sample.txt", sample_text.encode("utf-8"), "text/plain")},
+        headers=api_key_headers,
     )
 
     assert response.status_code == 201
@@ -163,10 +170,14 @@ def test_upload_txt_stores_chunks(
     mock_embedding_service.embed_texts.assert_called_once()
 
 
-def test_upload_invalid_file_type_returns_400(documents_client: TestClient) -> None:
+def test_upload_invalid_file_type_returns_400(
+    documents_client: TestClient,
+    api_key_headers: dict[str, str],
+) -> None:
     response = documents_client.post(
         "/api/v1/documents",
         files={"file": ("notes.docx", b"fake", "application/octet-stream")},
+        headers=api_key_headers,
     )
 
     assert response.status_code == 400
@@ -176,19 +187,24 @@ def test_upload_invalid_file_type_returns_400(documents_client: TestClient) -> N
 def test_list_and_get_document(
     documents_client: TestClient,
     sample_text: str,
+    api_key_headers: dict[str, str],
 ) -> None:
     created = documents_client.post(
         "/api/v1/documents",
         files={"file": ("sample.txt", sample_text.encode("utf-8"), "text/plain")},
+        headers=api_key_headers,
     ).json()
 
-    list_response = documents_client.get("/api/v1/documents")
+    list_response = documents_client.get("/api/v1/documents", headers=api_key_headers)
     assert list_response.status_code == 200
     listing = list_response.json()
     assert listing["total"] == 1
     assert listing["documents"][0]["id"] == created["id"]
 
-    detail_response = documents_client.get(f"/api/v1/documents/{created['id']}")
+    detail_response = documents_client.get(
+        f"/api/v1/documents/{created['id']}",
+        headers=api_key_headers,
+    )
     assert detail_response.status_code == 200
     detail = detail_response.json()
     assert detail["chunk_count"] >= 1
@@ -199,30 +215,48 @@ def test_delete_document_removes_vectors(
     documents_client: TestClient,
     in_memory_vector_store: InMemoryVectorStore,
     sample_text: str,
+    api_key_headers: dict[str, str],
 ) -> None:
     created = documents_client.post(
         "/api/v1/documents",
         files={"file": ("sample.txt", sample_text.encode("utf-8"), "text/plain")},
+        headers=api_key_headers,
     ).json()
     document_id = created["id"]
     assert document_id in in_memory_vector_store.chunks
 
-    delete_response = documents_client.delete(f"/api/v1/documents/{document_id}")
+    delete_response = documents_client.delete(
+        f"/api/v1/documents/{document_id}",
+        headers=api_key_headers,
+    )
     assert delete_response.status_code == 204
     assert document_id not in in_memory_vector_store.chunks
 
-    get_response = documents_client.get(f"/api/v1/documents/{document_id}")
+    get_response = documents_client.get(
+        f"/api/v1/documents/{document_id}",
+        headers=api_key_headers,
+    )
     assert get_response.status_code == 404
 
 
-def test_get_missing_document_returns_404(documents_client: TestClient) -> None:
-    response = documents_client.get("/api/v1/documents/does-not-exist")
+def test_get_missing_document_returns_404(
+    documents_client: TestClient,
+    api_key_headers: dict[str, str],
+) -> None:
+    response = documents_client.get(
+        "/api/v1/documents/does-not-exist",
+        headers=api_key_headers,
+    )
     assert response.status_code == 404
 
 
-def test_upload_empty_file_returns_400(documents_client: TestClient) -> None:
+def test_upload_empty_file_returns_400(
+    documents_client: TestClient,
+    api_key_headers: dict[str, str],
+) -> None:
     response = documents_client.post(
         "/api/v1/documents",
         files={"file": ("empty.txt", b"", "text/plain")},
+        headers=api_key_headers,
     )
     assert response.status_code == 400

@@ -41,6 +41,11 @@ def mock_vector_store(settings: Settings) -> MagicMock:
 
 
 @pytest.fixture
+def api_key_headers(settings: Settings) -> dict[str, str]:
+    return {"X-API-Key": settings.api_key}
+
+
+@pytest.fixture
 def client(mock_vector_store: MagicMock, settings: Settings) -> Generator[TestClient, None, None]:
     @asynccontextmanager
     async def test_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
