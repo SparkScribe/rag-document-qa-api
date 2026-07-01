@@ -1,0 +1,11 @@
+RAG Document Q&A API — Sample Fixture
+
+This is a short sample document used for unit and integration tests.
+
+Retrieval-Augmented Generation (RAG) combines document retrieval with language model synthesis.
+The system chunks documents, embeds each chunk into a vector database, and retrieves relevant
+passages at query time to ground the model's answer in source material.
+
+When a user asks a question, the query is embedded and compared against stored chunk vectors.
+The top matching chunks are passed to the LLM as context, and the response includes citations
+pointing back to the original document excerpts.
