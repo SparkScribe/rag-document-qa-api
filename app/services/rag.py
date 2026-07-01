@@ -8,7 +8,7 @@ from app.core.config import Settings
 from app.schemas.query import QueryResponse, SourceCitation
 from app.services.document_store import DocumentNotFoundError, DocumentStore
 from app.services.embedding import EmbeddingError, OpenAIEmbeddingService
-from app.services.llm import ChatError, OpenAIChatService, SYSTEM_PROMPT
+from app.services.llm import SYSTEM_PROMPT, ChatError, OpenAIChatService
 from app.services.vector_store import ScoredChunk, VectorStore, VectorStoreError
 
 logger = logging.getLogger(__name__)

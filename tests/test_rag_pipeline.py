@@ -14,7 +14,6 @@ from app.core.config import Settings
 from app.db.session import create_db_engine, init_database
 from app.main import create_app
 from app.schemas.documents import DocumentStatus
-from app.services.chunking import TextChunk
 from app.services.document_store import DocumentStore
 from app.services.embedding import OpenAIEmbeddingService
 from app.services.llm import OpenAIChatService
@@ -135,7 +134,10 @@ def rag_service(
     )
 
 
-def test_query_returns_sources_array(rag_service: RAGService, document_store: DocumentStore) -> None:
+def test_query_returns_sources_array(
+    rag_service: RAGService,
+    document_store: DocumentStore,
+) -> None:
     response = rag_service.query("What is RAG?")
     document_id = document_store.list_all()[0].id
 

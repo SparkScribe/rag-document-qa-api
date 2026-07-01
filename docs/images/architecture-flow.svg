@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" role="img" aria-label="RAG Document Q and A API architecture">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <style type="text/css"><![CDATA[
+      .title { font: 700 20px system-ui, sans-serif; fill: #f8fafc; }
+      .label { font: 600 13px system-ui, sans-serif; fill: #e2e8f0; }
+      .sub { font: 12px system-ui, sans-serif; fill: #94a3b8; }
+      .box { fill: #334155; stroke: #64748b; stroke-width: 1.5; }
+      .ingest { fill: #1d4ed8; stroke: #60a5fa; }
+      .query { fill: #047857; stroke: #34d399; }
+      .store { fill: #7c2d12; stroke: #fb923c; }
+      .arrow { stroke: #cbd5e1; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    ]]></style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#cbd5e1"/>
+    </marker>
+  </defs>
+
+  <rect width="920" height="360" fill="url(#bg)"/>
+  <text x="460" y="34" text-anchor="middle" class="title">RAG Document Q&amp;A API - Architecture</text>
+
+  <text x="40" y="68" class="label">Ingestion</text>
+  <rect x="40" y="80" width="120" height="44" rx="8" class="box ingest"/>
+  <text x="100" y="107" text-anchor="middle" class="label">POST /documents</text>
+
+  <rect x="190" y="80" width="100" height="44" rx="8" class="box"/>
+  <text x="240" y="107" text-anchor="middle" class="label">Parse PDF/TXT</text>
+
+  <rect x="320" y="80" width="90" height="44" rx="8" class="box"/>
+  <text x="365" y="107" text-anchor="middle" class="label">Chunk</text>
+
+  <rect x="440" y="80" width="110" height="44" rx="8" class="box"/>
+  <text x="495" y="107" text-anchor="middle" class="label">OpenAI Embed</text>
+
+  <rect x="580" y="72" width="120" height="60" rx="8" class="box store"/>
+  <text x="640" y="100" text-anchor="middle" class="label">Qdrant</text>
+  <text x="640" y="118" text-anchor="middle" class="sub">document_chunks</text>
+
+  <path d="M160 102 H190" class="arrow"/>
+  <path d="M290 102 H320" class="arrow"/>
+  <path d="M410 102 H440" class="arrow"/>
+  <path d="M550 102 H580" class="arrow"/>
+
+  <text x="40" y="188" class="label">Query</text>
+  <rect x="40" y="200" width="110" height="44" rx="8" class="box query"/>
+  <text x="95" y="227" text-anchor="middle" class="label">POST /query</text>
+
+  <rect x="180" y="200" width="110" height="44" rx="8" class="box"/>
+  <text x="235" y="227" text-anchor="middle" class="label">Embed question</text>
+
+  <rect x="320" y="200" width="130" height="44" rx="8" class="box"/>
+  <text x="385" y="227" text-anchor="middle" class="label">Similarity search</text>
+
+  <rect x="480" y="200" width="120" height="44" rx="8" class="box"/>
+  <text x="540" y="227" text-anchor="middle" class="label">Build context</text>
+
+  <rect x="630" y="200" width="110" height="44" rx="8" class="box"/>
+  <text x="685" y="227" text-anchor="middle" class="label">GPT answer</text>
+
+  <rect x="770" y="192" width="110" height="60" rx="8" class="box"/>
+  <text x="825" y="218" text-anchor="middle" class="label">Response</text>
+  <text x="825" y="236" text-anchor="middle" class="sub">answer + sources</text>
+
+  <path d="M150 222 H180" class="arrow"/>
+  <path d="M290 222 H320" class="arrow"/>
+  <path d="M450 222 H480" class="arrow"/>
+  <path d="M600 222 H630" class="arrow"/>
+  <path d="M740 222 H770" class="arrow"/>
+
+  <path d="M640 132 V170 H385 V200" class="arrow" stroke-dasharray="6 4"/>
+
+  <text x="460" y="320" text-anchor="middle" class="sub">FastAPI | SQLite metadata | X-API-Key auth | No LangChain</text>
+</svg>

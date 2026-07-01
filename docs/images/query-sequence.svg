@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-label="RAG query sequence diagram">
+  <defs>
+    <style type="text/css"><![CDATA[
+      .title { font: 700 18px system-ui, sans-serif; fill: #0f172a; }
+      .actor { font: 600 13px system-ui, sans-serif; fill: #1e293b; }
+      .msg { font: 12px system-ui, sans-serif; fill: #334155; }
+      .lifeline { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4 4; }
+      .arrow { stroke: #2563eb; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .return { stroke: #059669; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrow-green); }
+      .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+    ]]></style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <rect width="800" height="420" class="box"/>
+  <text x="400" y="32" text-anchor="middle" class="title">Query sequence</text>
+
+  <text x="80" y="70" text-anchor="middle" class="actor">Client</text>
+  <text x="280" y="70" text-anchor="middle" class="actor">FastAPI</text>
+  <text x="480" y="70" text-anchor="middle" class="actor">Qdrant</text>
+  <text x="680" y="70" text-anchor="middle" class="actor">OpenAI</text>
+
+  <line x1="80" y1="85" x2="80" y2="380" class="lifeline"/>
+  <line x1="280" y1="85" x2="280" y2="380" class="lifeline"/>
+  <line x1="480" y1="85" x2="480" y2="380" class="lifeline"/>
+  <line x1="680" y1="85" x2="680" y2="380" class="lifeline"/>
+
+  <path d="M80 110 H275" class="arrow"/>
+  <text x="175" y="104" text-anchor="middle" class="msg">POST /query</text>
+
+  <path d="M280 140 H675" class="arrow"/>
+  <text x="480" y="134" text-anchor="middle" class="msg">Embed question</text>
+
+  <path d="M675 165 H285" class="return"/>
+  <text x="480" y="159" text-anchor="middle" class="msg">vector</text>
+
+  <path d="M280 195 H475" class="arrow"/>
+  <text x="375" y="189" text-anchor="middle" class="msg">search top_k</text>
+
+  <path d="M475 220 H285" class="return"/>
+  <text x="375" y="214" text-anchor="middle" class="msg">chunks + scores</text>
+
+  <path d="M280 250 H675" class="arrow"/>
+  <text x="480" y="244" text-anchor="middle" class="msg">chat completion</text>
+
+  <path d="M675 275 H285" class="return"/>
+  <text x="480" y="269" text-anchor="middle" class="msg">answer</text>
+
+  <path d="M280 305 H85" class="return"/>
+  <text x="180" y="299" text-anchor="middle" class="msg">answer + sources[]</text>
+</svg>
