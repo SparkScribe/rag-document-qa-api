@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+from dataclasses import dataclass
 from typing import Any
 
 from qdrant_client import QdrantClient
@@ -16,6 +17,17 @@ logger = logging.getLogger(__name__)
 
 class VectorStoreError(Exception):
     """Raised when vector store operations fail."""
+
+
+@dataclass(frozen=True, slots=True)
+class ScoredChunk:
+    """A retrieved chunk with similarity score."""
+
+    document_id: str
+    chunk_index: int
+    text: str
+    filename: str
+    score: float
 
 
 class VectorStore:
@@ -142,6 +154,66 @@ class VectorStore:
         except Exception as exc:
             logger.error("Failed to count chunks for document %s: %s", document_id, exc)
             raise VectorStoreError(f"Failed to count chunks: {exc}") from exc
+
+    def search_similar(
+        self,
+        query_vector: list[float],
+        *,
+        top_k: int,
+        document_id: str | None = None,
+        score_threshold: float | None = None,
+    ) -> list[ScoredChunk]:
+        """Return the top matching chunks for a query embedding."""
+        query_filter: qmodels.Filter | None = None
+        if document_id is not None:
+            query_filter = qmodels.Filter(
+                must=[
+                    qmodels.FieldCondition(
+                        key="document_id",
+                        match=qmodels.MatchValue(value=document_id),
+                    )
+                ]
+            )
+
+        try:
+            results = self._client.search(
+                collection_name=self.collection_name,
+                query_vector=query_vector,
+                query_filter=query_filter,
+                limit=top_k,
+                score_threshold=score_threshold,
+                with_payload=True,
+            )
+        except Exception as exc:
+            logger.error("Vector search failed: %s", exc)
+            raise VectorStoreError(f"Vector search failed: {exc}") from exc
+
+        chunks: list[ScoredChunk] = []
+        for point in results:
+            payload = point.payload or {}
+            text = payload.get("text")
+            doc_id = payload.get("document_id")
+            chunk_index = payload.get("chunk_index")
+            filename = payload.get("filename", "")
+
+            if not isinstance(text, str) or not isinstance(doc_id, str):
+                logger.warning("Skipping search result with invalid payload: %s", point.id)
+                continue
+            if not isinstance(chunk_index, int):
+                logger.warning("Skipping search result with invalid chunk_index: %s", point.id)
+                continue
+
+            chunks.append(
+                ScoredChunk(
+                    document_id=doc_id,
+                    chunk_index=chunk_index,
+                    text=text,
+                    filename=str(filename),
+                    score=float(point.score),
+                )
+            )
+
+        return chunks
 
     def close(self) -> None:
         self._client.close()

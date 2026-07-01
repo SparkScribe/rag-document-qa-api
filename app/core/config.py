@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     # OpenAI client timeout in seconds
     openai_timeout_seconds: float = 30.0
 
+    # Query / RAG defaults
+    query_top_k_default: int = Field(default=5, ge=1, le=50)
+    min_query_score: float = Field(default=0.3, ge=0.0, le=1.0)
+    query_excerpt_max_chars: int = Field(default=300, ge=50, le=2000)
+
     @property
     def max_upload_bytes(self) -> int:
         return self.max_upload_mb * 1024 * 1024

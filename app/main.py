@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from app import __version__
 from app.api.v1.documents import router as documents_router
 from app.api.v1.health import router as health_router
+from app.api.v1.query import router as query_router
 from app.core.lifespan import lifespan
 
 logging.basicConfig(
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(documents_router, prefix="/api/v1")
+    app.include_router(query_router, prefix="/api/v1")
 
     return app
 

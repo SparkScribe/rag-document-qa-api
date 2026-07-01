@@ -12,6 +12,8 @@ from app.db.session import create_db_engine, init_database
 from app.services.document_store import DocumentStore
 from app.services.embedding import OpenAIEmbeddingService
 from app.services.ingestion import IngestionService
+from app.services.llm import OpenAIChatService
+from app.services.rag import RAGService
 from app.services.vector_store import VectorStore
 
 logger = logging.getLogger(__name__)
@@ -26,11 +28,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     session_factory: sessionmaker[Session] = init_database(engine)
     document_store = DocumentStore(session_factory)
     embedding_service = OpenAIEmbeddingService(settings)
+    chat_service = OpenAIChatService(settings)
     ingestion_service = IngestionService(
         settings=settings,
         document_store=document_store,
         vector_store=vector_store,
         embedding_service=embedding_service,
+    )
+    rag_service = RAGService(
+        settings=settings,
+        vector_store=vector_store,
+        embedding_service=embedding_service,
+        chat_service=chat_service,
+        document_store=document_store,
     )
 
     try:
@@ -47,7 +57,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.session_factory = session_factory
     app.state.document_store = document_store
     app.state.embedding_service = embedding_service
+    app.state.chat_service = chat_service
     app.state.ingestion_service = ingestion_service
+    app.state.rag_service = rag_service
 
     yield
 
@@ -74,3 +86,11 @@ def get_embedding_service(request: Request) -> OpenAIEmbeddingService:
 
 def get_ingestion_service(request: Request) -> IngestionService:
     return request.app.state.ingestion_service
+
+
+def get_chat_service(request: Request) -> OpenAIChatService:
+    return request.app.state.chat_service
+
+
+def get_rag_service(request: Request) -> RAGService:
+    return request.app.state.rag_service
