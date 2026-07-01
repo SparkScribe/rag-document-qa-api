@@ -11,7 +11,7 @@ permissions:
 
 env:
   API_KEY: test-ci-api-key
-  DATABASE_URL: sqlite:///:memory:
+  DATABASE_URL: "sqlite:///:memory:"
   QDRANT_URL: http://localhost:6333
 
 jobs:
